@@ -52,6 +52,7 @@ const ComparingNumbers = () => {
         const [alligatorMoveDirection, setAlligatorMoveDirection] = useState(null); // 'left', 'right', or null
         const [currentSuccessMessage, setCurrentSuccessMessage] = useState(''); // Store the current success message
         const [selectedSide, setSelectedSide] = useState(null); // Track which side was selected ('left', 'right', or null)
+        const [fadeOutButton, setFadeOutButton] = useState(null); // Track which button should fade out ('left', 'right', or null)
         
         // Set of good response messages
         const successMessages = [
@@ -95,11 +96,27 @@ const ComparingNumbers = () => {
 
         const generateRandomCounts = () => {
                 const isThreeDigits = Math.random() < 0.5;
+                const shouldHaveSameLeftmostDigit = Math.random() < 0.6; 
                 let left, right;
-                do {
-                        left = generateTwoOrThreeDigitNumber(isThreeDigits);
-                        right = generateTwoOrThreeDigitNumber(isThreeDigits);
-                } while (left === right); // Ensure numbers are never equal
+                
+                if (shouldHaveSameLeftmostDigit) {
+                        // Generate numbers with the same leftmost digit
+                        do {
+                                left = generateTwoOrThreeDigitNumber(isThreeDigits);
+                                const leftmostDigit = Math.floor(left / Math.pow(10, isThreeDigits ? 2 : 1));
+                                
+                                // Generate right number with same leftmost digit
+                                const min = isThreeDigits ? leftmostDigit * 100 : leftmostDigit * 10;
+                                const max = isThreeDigits ? (leftmostDigit + 1) * 100 - 1 : (leftmostDigit + 1) * 10 - 1;
+                                right = Math.floor(Math.random() * (max - min + 1)) + min;
+                        } while (left === right); // Ensure numbers are never equal
+                } else {
+                        // Use existing logic for different leftmost digits
+                        do {
+                                left = generateTwoOrThreeDigitNumber(isThreeDigits);
+                                right = generateTwoOrThreeDigitNumber(isThreeDigits);
+                        } while (left === right); // Ensure numbers are never equal
+                }
                 
                 setLeftNumber(left);
                 setRightNumber(right);
@@ -132,6 +149,11 @@ const ComparingNumbers = () => {
                         // Trigger confetti animation
                         triggerConfetti();
                         
+                        // Fade out the button after alligator reaches it
+                        setTimeout(() => {
+                                setFadeOutButton('left');
+                        }, 1500); // 1.5 seconds after alligator starts moving
+                        
                 } else {
                         setSadigator(true);
                         setAnimate(false);
@@ -149,6 +171,7 @@ const ComparingNumbers = () => {
                         setShowGreatJob(false);
                         setAlligatorMoveDirection(null);
                         setSelectedSide(null); // Deselect after animation ends
+                        setFadeOutButton(null); // Reset fade out state
                         
                         // Regenerate random counts if the correct answer was clicked
                         if (isCorrectAnswer) {
@@ -178,6 +201,11 @@ const ComparingNumbers = () => {
                         // Trigger confetti animation
                         triggerConfetti();
                         
+                        // Fade out the button after alligator reaches it
+                        setTimeout(() => {
+                                setFadeOutButton('right');
+                        }, 1500); // 1.5 seconds after alligator starts moving
+                        
                 } else {
                         setSadigator(true);
                         setAnimate(false);
@@ -195,6 +223,7 @@ const ComparingNumbers = () => {
                         setShowGreatJob(false);
                         setAlligatorMoveDirection(null);
                         setSelectedSide(null); // Deselect after animation ends
+                        setFadeOutButton(null); // Reset fade out state
                         
                         // Regenerate random counts if the correct answer was clicked
                         if (isCorrectAnswer) {
@@ -236,7 +265,7 @@ const ComparingNumbers = () => {
                                         onClick={handleLeftClick}
                                         onMouseEnter={() => handleNumberHover('left')}
                                         disabled={isAnimating}
-                                        className={`w-28 h-24 md:w-28 md:h-28 max-[410px]:w-24 max-[410px]:h-20 max-[356px]:w-16 mx-2 rounded-2xl border-2 border-amber-400 bg-white/70 backdrop-blur-sm shadow-lg p-4 max-[410px]:p-3 flex items-center justify-center transition-transform duration-200 ${selectedSide === 'left' ? 'ring-4 ring-amber-300' : ''} ${isAnimating ? 'opacity-60 cursor-not-allowed' : 'hover:scale-[1.02]'} `}
+                                        className={`w-28 h-24 md:w-28 md:h-28 max-[410px]:w-24 max-[410px]:h-20 max-[356px]:w-16 mx-2 rounded-2xl border-2 border-amber-400 bg-white/70 backdrop-blur-sm shadow-lg p-4 max-[410px]:p-3 flex items-center justify-center transition-transform duration-200 ${selectedSide === 'left' ? 'ring-4 ring-amber-300' : ''} ${isAnimating ? 'opacity-60' : 'hover:scale-[1.02]'} ${fadeOutButton === 'left' ? 'fade-out-in-place-animation' : ''}`}
                                 >
                                         <span className='text-4xl md:text-5xl max-[410px]:text-3xl font-extrabold text-amber-700 select-none'>
                                                 {leftNumber}
@@ -247,7 +276,7 @@ const ComparingNumbers = () => {
                                         onClick={handleRightClick}
                                         onMouseEnter={() => handleNumberHover('right')}
                                         disabled={isAnimating}
-                                        className={`w-28 h-24 md:w-28 md:h-28 max-[410px]:w-24 max-[410px]:h-20 max-[356px]:w-16 mx-2 rounded-2xl border-2 border-amber-400 bg-white/70 backdrop-blur-sm shadow-lg p-4 max-[410px]:p-3 flex items-center justify-center transition-transform duration-200 ${selectedSide === 'right' ? 'ring-4 ring-amber-300' : ''} ${isAnimating ? 'opacity-60 cursor-not-allowed' : 'hover:scale-[1.02]'} `}
+                                        className={`w-28 h-24 md:w-28 md:h-28 max-[410px]:w-24 max-[410px]:h-20 max-[356px]:w-16 mx-2 rounded-2xl border-2 border-amber-400 bg-white/70 backdrop-blur-sm shadow-lg p-4 max-[410px]:p-3 flex items-center justify-center transition-transform duration-200 ${selectedSide === 'right' ? 'ring-4 ring-amber-300' : ''} ${isAnimating ? 'opacity-60' : 'hover:scale-[1.02]'} ${fadeOutButton === 'right' ? 'fade-out-in-place-animation' : ''}`}
                                 >
                                         <span className='text-4xl md:text-5xl max-[410px]:text-3xl font-extrabold text-amber-700 select-none'>
                                                 {rightNumber}
@@ -255,7 +284,7 @@ const ComparingNumbers = () => {
                                 </button>
                         </div>
 
-                        <div className={`${showTryAgain || showGreatJob ? 'fade-in-up-animation' : 'fade-out-down-animation'} transition-opacity duration-200 w-full flex justify-center`}>
+                        <div className={`absolute bottom-0 ${showTryAgain || showGreatJob ? 'fade-in-up-animation' : 'fade-out-down-animation'} transition-opacity duration-200 w-full flex justify-center`}>
                                 <div className='w-[75%] text-center text-sm p-5'>
                                         {showTryAgain && (
                                                 <div className='bg-yellow-100 text-yellow-800 border-2 border-yellow-400 rounded-lg font-bold p-2 m-30'>
