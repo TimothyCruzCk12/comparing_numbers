@@ -302,5 +302,5 @@ const ComparingNumbers = () => {
         )
 };
 
-
+// Export the ComparingNumbers component
 export default ComparingNumbers;
